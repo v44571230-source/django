@@ -1,0 +1,136 @@
+/cryptid-site
+ ├─ /frontend  (Next.js)
+ │   ├─ pages/
+ │   │   ├─ index.js
+ │   │   ├─ cryptid/[id].js
+ │   └─ components/
+ │       ├─ Navbar.js
+ │       ├─ Gallery.js
+ │       └─ CryptidCard.js
+ ├─ /backend (Flask)
+ │   ├─ app.py
+ │   └─ database.db
+ ├─ /ai_prompts
+ │   └─ generate_image.py
+ └─ README.md
+import openai
+
+openai.api_key = "YOUR_API_KEY"
+
+def generate_cryptid_image(description):
+    response = openai.Image.create(
+        prompt=description,
+        n=1,
+        size="1024x1024"
+    )
+    image_url = response['data'][0]['url']
+    return image_url
+
+url = generate_cryptid_image("A tall shadowy humanoid with glowing eyes in a misty forest")
+print(url)
+import openai
+
+openai.api_key = "YOUR_API_KEY"
+
+def generate_cryptid_image(description):
+    response = openai.Image.create(
+        prompt=description,
+        n=1,
+        size="512x512"
+    )
+    return response['data'][0]['url']
+id | name       | region     | description | sightings | image_url
+from flask import Flask, render_template, request, jsonify
+import openai
+
+app = Flask(__name__)
+
+# Set your OpenAI API key
+openai.api_key = "YOUR_API_KEY"
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route("/ask_ai", methods=["POST"])
+def ask_ai():
+    user_input = request.json.get("question")
+    
+    response = openai.ChatCompletion.create(
+        model="gpt-5-mini",  # This is me!
+        messages=[{"role": "user", "content": user_input}],
+        temperature=0.7,
+        max_tokens=500
+    )
+    
+    answer = response.choices[0].message.content
+    return jsonify({"answer": answer})
+
+if __name__ == "__main__":
+    app.run(debug=True)
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cryptid AI Assistant</title>
+</head>
+<body>
+    <h1>Ask the Cryptid AI!</h1>
+    <input type="text" id="question" placeholder="Ask about a cryptid...">
+    <button onclick="askAI()">Ask</button>
+    <p id="answer"></p>
+
+    <script>
+        async function askAI() {
+            const question = document.getElementById("question").value;
+            const response = await fetch("/ask_ai", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question })
+            });
+            const data = await response.json();
+            document.getElementById("answer").innerText = data.answer;
+        }
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cryptid AI Assistant</title>
+</head>
+<body>
+    <h1>Ask the Cryptid AI!</h1>
+    <input type="text" id="question" placeholder="Ask about a cryptid...">
+    <button onclick="askAI()">Ask</button>
+    <p id="answer"></p>
+
+    <script>
+        async function askAI() {
+            const question = document.getElementById("question").value;
+            const response = await fetch("/ask_ai", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question })
+            });
+            const data = await response.json();
+            document.getElementById("answer").innerText = data.answer;
+        }
+    </script>
+</body>
+</html>
+# views.py in Django
+from django.http import JsonResponse
+import openai
+
+openai.api_key = "YOUR_API_KEY"
+
+def ask_ai(request):
+    question = request.GET.get("question", "")
+    response = openai.ChatCompletion.create(
+        model="gpt-5-mini",
+        messages=[{"role": "user", "content": question}],
+        temperature=0.7,
+        max_tokens=500
+    )
+    answer = response.choices[0].message.content
+    return JsonResponse({"answer": answer})
